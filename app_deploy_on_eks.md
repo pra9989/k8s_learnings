@@ -147,7 +147,8 @@ module "eks" {
 }
 ```
 provider.tf (Specifies the AWS provider)
-</> hcl
+</> Markdown
+---
 terraform {
   required_providers {
     aws = {
@@ -160,4 +161,4 @@ terraform {
 provider "aws" {
   region = "ap-south-1"
 }
-
+---
