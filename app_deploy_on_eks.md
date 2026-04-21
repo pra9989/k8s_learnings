@@ -158,7 +158,16 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = "ap-south-1"
-}
+  provider "aws" {
+    region = "ap-south-1"
+  }
 ---
+backend.tf (Configure S3 backend for state management)
+</>  hcl
+terraform {
+  backend "s3" {
+    bucket = "mir-terraform-s3-bucket"
+    key    = "key/terraform.tfstate"
+    region = "ap-south-1"
+  }
+}
