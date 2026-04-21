@@ -54,7 +54,8 @@ In the infrastructure repository, create the following Terraform files:
 
 main.tf (Terraform configuration for EKS)
 </> Markdown
-```resource "aws_vpc" "main" {
+```
+resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
 }
@@ -145,3 +146,18 @@ module "eks" {
   }
 }
 ```
+provider.tf (Specifies the AWS provider)
+</> hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
