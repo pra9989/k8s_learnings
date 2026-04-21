@@ -163,7 +163,8 @@ terraform {
   }
 ---
 backend.tf (Configure S3 backend for state management)
-</>  hcl
+</>  Markdown
+---
 terraform {
   backend "s3" {
     bucket = "mir-terraform-s3-bucket"
@@ -171,3 +172,132 @@ terraform {
     region = "ap-south-1"
   }
 }
+---
+3.2. Initialize and Validate Infrastructure
+Push the code to your GitHub infrastructure repository:
+</> Markdown
+---
+git add .
+git commit -m "Initial Terraform setup for EKS"
+git push origin main
+---
+Step 4: Create GitHub Actions Workflow
+Create a GitHub Actions workflow file to automate Terraform deployment.
+
+.github/workflows/terraform.yml
+
+</> Markdown
+---
+name: Terraform CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Apply Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.6
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Plan
+      run: terraform plan
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
+---
+GitHub Actions will:
+
+Initialize Terraform.
+Plan the infrastructure.
+Apply changes to the main branch.
+
+Step 5: Install ArgoCD on EKS Cluster
+Configure kubectl to access your EKS cluster:
+
+</> Markdown
+---
+aws eks update-kubeconfig --region ap-south-1 --name my-cluster
+kubectl cluster-info
+kubectl get nodes
+---
+
+Install ArgoCD:
+</> Markdown
+---
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+---
+3. Change the ArgoCD server service type to LoadBalancer:
+   </> Markdown
+---
+
+
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+---
+
+5. Retrieve Initial Admin Credentials:
+   </> Markdown
+---
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+---
+Step 6: Access the ArgoCD UI
+Get the External IP of the ArgoCD server:
+   </> Markdown
+---
+
+
+kubectl get svc argocd-server -n argocd
+---
+Access the ArgoCD UI by navigating to http://<EXTERNAL-IP> in your browser.
+
+Login to ArgoCD:
+
+Username: admin
+Password: Retrieved from the previous step.
+
+Step 7: Configure ArgoCD for Automated Application Deployment
+Log in to ArgoCD UI.
+
+Add a New Application:
+
+In ArgoCD UI, click on New App.
+Fill in the following details:
+Application Name: my-app
+Project: default
+Sync Policy: Automatic (if desired)
+Source:
+Repository URL: https://github.com/your-username/application
+Revision: main
+Path: / (or the relevant folder for manifests)
+Destination:
+Cluster: https://kubernetes.default.svc
+Namespace: default (or any other)
+Save the configuration. ArgoCD will now monitor the application repository for changes and deploy them automatically to the EKS cluster.
+
+By following this guide, you now have a fully automated GitOps pipeline using Terraform, GitHub Actions, and ArgoCD. Your EKS infrastructure is provisioned, and application deployments are automated through ArgoCD.
+
+
