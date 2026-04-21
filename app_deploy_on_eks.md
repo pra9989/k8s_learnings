@@ -53,7 +53,8 @@ Step 3: Configure Terraform for EKS Setup
 In the infrastructure repository, create the following Terraform files:
 
 main.tf (Terraform configuration for EKS)
-'resource "aws_vpc" "main" {
+(``` 
+resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
 }
@@ -142,4 +143,5 @@ module "eks" {
       desired_size = 1
     }
   }
-}'
+}
+)
